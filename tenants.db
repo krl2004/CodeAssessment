@@ -1,0 +1,13 @@
+CREATE TABLE tenants (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+CREATE TABLE login (
+    id SERIAL PRIMARY KEY,
+    tenant_id INTEGER NOT NULL,
+    username TEXT NOT NULL,
+    ip_source TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status in ('success', 'failure')),
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
