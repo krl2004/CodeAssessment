@@ -3,8 +3,8 @@ CREATE TABLE tenants (
     name TEXT NOT NULL
 );
 
-CREATE TABLE login (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE logins (
+    id TEXT PRIMARY KEY,
     tenant_id INTEGER NOT NULL,
     username TEXT NOT NULL,
     ip_source TEXT NOT NULL,

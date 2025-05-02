@@ -5,8 +5,8 @@ Database schema:
         name TEXT NOT NULL
     );
 
-    CREATE TABLE login (
-        id SERIAL PRIMARY KEY,
+    CREATE TABLE logins (
+        id TEXT PRIMARY KEY,
         tenant_id INTEGER NOT NULL,
         username TEXT NOT NULL,
         ip_source TEXT NOT NULL,
@@ -30,8 +30,8 @@ API construction:
             POST /api/1/events
                 Content-Type: application/json
                 {
-                    "event_id": "string-for-id",
-                    "user_id": "2",
+                    "id": "string-for-id",
+                    "username": "string-for-username",
                     "ip_source": "123.456.7.8",
                     "status": "failure",
                     "timestamp": "2025-05-02T12:34:56Z"

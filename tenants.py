@@ -35,7 +35,7 @@ def create_event(tenant_id):
     data = request.get_json()
 
     #Validate input data
-    required_fields = ['event_id', 'user_id', 'ip_source', 'status', 'timestamp']
+    required_fields = ['id', 'username', 'ip_source', 'status', 'timestamp']
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
     
@@ -44,14 +44,14 @@ def create_event(tenant_id):
    
     #Check if indempotent
     conn = get_db()
-    existing = conn.execute('SELECT id FROM login_events WHERE id = ? AND tenant_id = ?', (data['event_id'], tenant_id)).fetchone()
+    existing = conn.execute('SELECT id FROM logins WHERE id = ? AND tenant_id = ?', (data['id'], tenant_id)).fetchone()
     if existing:
         conn.close()
         return jsonify({'error': 'Event already exists'}), 409
     
     #Insert new event into database
     try:
-        conn.execute('INSERT INTO login_events (id, tenant_id, user_id, ip_source, status, timestamp) VALUES (?, ?, ?, ?, ?, ?)', (data['event_id'], tenant_id, data['user_id'], data['ip_source'], data['status'], data['timestamp']))
+        conn.execute('INSERT INTO logins (id, tenant_id, username, ip_source, status, timestamp) VALUES (?, ?, ?, ?, ?, ?)', (data['id'], tenant_id, data['username'], data['ip_source'], data['status'], data['timestamp']))
         conn.commit()
         conn.close()
         return jsonify({'message': 'Event created'}), 201
@@ -92,7 +92,7 @@ def get_suspicious_events(tenant_id):
     conn = get_db()
     #Get suspicious IPs with failure counts
     query = '''SELECT ip_source, COUNT(*) as failure_count, MAX(timestamp) as last_attempt, MIN(timestamp) as first_attempt
-        FROM login_events
+        FROM logins
         WHERE tenant_id = ? AND status = 'failure' AND timestamp >= ?
         GROUP BY ip_source
         HAVING COUNT(*) >= ?
@@ -103,7 +103,7 @@ def get_suspicious_events(tenant_id):
     #Total failure count
     total = conn.execute('''SELECT COUNT(DISTINCT ip_source) as total
         FROM (SELECT ip_source
-                FROM login_events
+                FROM logins
                 WHERE tenant_id = ? AND status = 'failure' AND timestamp >= ?
                 GROUP BY ip_source
                 HAVING COUNT(*) >= ?)''', (tenant_id, time_window.isoformat(), threshold)).fetchone()
